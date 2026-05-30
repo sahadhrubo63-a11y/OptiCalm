@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiCalm - Custom Cosmic Healing Space</title>
+    <title>OptiCalm - VR Cosmic Healing Space</title>
     <style>
         body {
             margin: 0;
@@ -20,21 +20,47 @@
             position: relative;
         }
 
-        /* ইউটিউব ব্যাকগ্রাউন্ড ভিডিও কন্টেইনার - ফুল ও ফুল ব্রাইটনেস */
-        .video-background {
+        /* মূল কন্টেইনার - VR অন থাকলে এটি গ্রিড লেআউট পাবে */
+        .main-display-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .main-display-container.vr-active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 200vw; /* দুই স্ক্রিনের জন্য উইডথ সামঞ্জস্য করা */
+            left: -50vw;
+        }
+
+        /* ভিডিও ব্যাকগ্রাউন্ড সেটআপ */
+        .video-container-wrapper {
             position: absolute;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
+            display: flex;
             opacity: 0;
             transition: opacity 1s ease;
         }
 
-        .video-background iframe {
+        .video-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .video-box iframe {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -45,12 +71,16 @@
             transform: translate(-50%, -50%);
         }
 
+        /* VR একটিভ হলে ভিডিও ২ ভাগে ভাগ হবে */
+        .vr-active-bg .video-box { width: 50%; }
+        .vr-active-bg #videoPlayer2 { display: block !important; }
+
         /* কন্ট্রোল প্যানেল */
         .controls {
             position: absolute;
             z-index: 15;
             text-align: center;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             padding: 25px;
             border-radius: 20px;
             backdrop-filter: blur(15px);
@@ -74,42 +104,26 @@
             box-sizing: border-box;
         }
 
-        select option {
-            background: #111111;
-            color: white;
-        }
-
-        button {
-            cursor: pointer;
-            background: linear-gradient(90deg, #1e40af, #0284c7);
-            font-weight: bold;
-            border: none;
-            transition: 0.3s ease;
-        }
-
-        button:hover { transform: scale(1.02); filter: brightness(1.2); }
-
-        /* প্রধান অ্যানিমেশন এরিয়া */
-        .main-display-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+        .checkbox-container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 1;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 5px;
         }
+        .checkbox-container input { width: auto; margin: 0; cursor: pointer; }
 
+        select option { background: #111111; color: white; }
+        button { cursor: pointer; background: linear-gradient(90deg, #1e40af, #0284c7); font-weight: bold; border: none; transition: 0.3s ease; }
+        button:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+        /* ক্লাসিক মোডের চোখের শেপ লেআউট */
         .dual-eye-container {
             display: flex;
             justify-content: space-around;
             align-items: center;
             width: 100%;
-            max-width: 1100px;
             height: 100%;
-            position: absolute;
         }
 
         .eye-space {
@@ -121,10 +135,13 @@
             height: 100%;
         }
 
+        /* VR এর জন্য ক্লাসিক মোড ডুপ্লিকেট কন্টেইনার */
+        #dualEyeView2 { display: none; }
+
         .shape {
             position: absolute;
-            width: 260px;
-            height: 260px;
+            width: 240px;
+            height: 240px;
             opacity: 0;
             display: none;
             filter: blur(25px);
@@ -134,55 +151,38 @@
         .circle { border-radius: 50%; }
         @keyframes circleBreathe {
             0% { transform: scale(0.6); background: radial-gradient(circle, #00d2ff, #0066ff, transparent); box-shadow: 0 0 70px #0066ff; opacity: 0.3; }
-            50% { transform: scale(1.3); background: radial-gradient(circle, #00ffcc, #00a3ff, transparent); box-shadow: 0 0 140px #00ffcc; opacity: 0.9; }
+            50% { transform: scale(1.2); background: radial-gradient(circle, #00ffcc, #00a3ff, transparent); box-shadow: 0 0 130px #00ffcc; opacity: 0.9; }
             100% { transform: scale(0.6); background: radial-gradient(circle, #00d2ff, #0066ff, transparent); box-shadow: 0 0 70px #0066ff; opacity: 0.3; }
         }
 
         .square { border-radius: 30px; }
         @keyframes squareBreathe {
             0% { transform: scale(0.6) rotate(0deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 70px #d946ef; opacity: 0.3; }
-            50% { transform: scale(1.2) rotate(45deg); background: radial-gradient(circle, #ff007f, #aa00ff, transparent); box-shadow: 0 0 130px #ff007f; opacity: 0.8; }
+            50% { transform: scale(1.1) rotate(45deg); background: radial-gradient(circle, #ff007f, #aa00ff, transparent); box-shadow: 0 0 120px #ff007f; opacity: 0.8; }
             100% { transform: scale(0.6) rotate(90deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 70px #d946ef; opacity: 0.3; }
         }
 
-        /* সাইনেসোইডাল ক্যানভাস */
-        #cosmicCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: none;
-            mix-blend-mode: screen;
-            z-index: 2;
-        }
-
-        /* ওভারলে ইনফো */
-        .info-overlay {
-            position: absolute;
-            bottom: 30px;
-            z-index: 10;
-            text-align: center;
-            pointer-events: none;
-        }
-
+        /* ক্যানভাস ও টেক্সট ওভারলে */
+        #cosmicCanvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: none; mix-blend-mode: screen; z-index: 2; }
+        .info-overlay { position: absolute; bottom: 30px; z-index: 10; text-align: center; pointer-events: none; }
         .timer-display { font-size: 24px; font-weight: 300; letter-spacing: 2px; color: #cbd5e1; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
         .instruction { font-size: 18px; margin-top: 8px; color: #94a3b8; height: 25px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
         
-        #audioPlayer, #videoPlayer { display: none; }
-        .video-background #videoPlayer { display: block; }
+        #audioPlayer { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="video-background" id="videoBgContainer">
-        <div id="videoPlayer"></div>
+    <!-- ব্যাকগ্রাউন্ড ভিডিওর জন্য হোল্ডার (VR-এর জন্য ডাবল অপশন রাখা হয়েছে) -->
+    <div class="video-container-wrapper" id="videoBgContainer">
+        <div class="video-box"><div id="videoPlayer1"></div></div>
+        <div class="video-box" style="display:none;" id="videoPlayer2Holder"><div id="videoPlayer2"></div></div>
     </div>
 
     <div id="audioPlayer"></div>
 
     <div class="controls" id="controlPanel">
-        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Cosmic Healing Space</h3>
+        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Cosmic VR Space</h3>
         
         <label style="font-size: 14px; color:#a3a3a3;">সময় দিন (মিনিট):</label>
         <input type="number" id="timeInput" min="1" max="60" value="2">
@@ -193,20 +193,40 @@
             <option value="video">Cosmic & Nature Video (গ্যালাক্সি ও প্রকৃতি ভিডিও)</option>
         </select>
 
+        <div class="checkbox-container">
+            <label for="vrCheckbox" style="font-size: 15px; color:#38bdf8;">VR Box মোড সক্রিয় করুন</label>
+            <input type="checkbox" id="vrCheckbox">
+        </div>
+
         <button onclick="startHealingSession()">সেশন শুরু করুন</button>
     </div>
 
-    <div class="main-display-container">
-        <div class="dual-eye-container" id="dualEyeView">
+    <!-- প্রধান কন্টেইনার -->
+    <div class="main-display-container" id="mainDisplay">
+        <!-- প্রথম সেট (Left Eye View / Normal View) -->
+        <div class="dual-eye-container" id="dualEyeView1">
             <div class="eye-space">
-                <div class="shape circle" id="left-circleShape"></div>
-                <div class="shape square" id="left-squareShape"></div>
+                <div class="shape circle" id="l-c-1"></div>
+                <div class="shape square" id="l-s-1"></div>
             </div>
             <div class="eye-space">
-                <div class="shape circle" id="right-circleShape"></div>
-                <div class="shape square" id="right-squareShape"></div>
+                <div class="shape circle" id="r-c-1"></div>
+                <div class="shape square" id="r-s-1"></div>
             </div>
         </div>
+
+        <!-- দ্বিতীয় সেট (Right Eye View - শুধুমাত্র VR বক্সে দেখাবে) -->
+        <div class="dual-eye-container" id="dualEyeView2">
+            <div class="eye-space">
+                <div class="shape circle" id="l-c-2"></div>
+                <div class="shape square" id="l-s-2"></div>
+            </div>
+            <div class="eye-space">
+                <div class="shape circle" id="r-c-2"></div>
+                <div class="shape square" id="r-s-2"></div>
+            </div>
+        </div>
+
         <canvas id="cosmicCanvas"></canvas>
     </div>
 
@@ -218,14 +238,13 @@
     <script>
         let countdown;
         let modeInterval;
-        let audioPlayer;
-        let videoPlayer;
+        let audioPlayer, videoPlayer1, videoPlayer2;
         let animationFrameId;
         let activeVisualMode = "black";
+        let isVRMode = false;
         
         const cosmicCanvas = document.getElementById('cosmicCanvas');
         const ctx = cosmicCanvas.getContext('2d');
-        
         let waveTime = 0;
         let isCosmicActive = false;
 
@@ -245,53 +264,59 @@
                 playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'I3OJUwILelU' }
             });
 
-            videoPlayer = new YT.Player('videoPlayer', {
+            videoPlayer1 = new YT.Player('videoPlayer1', {
+                height: '100%', width: '100%', videoId: '1ZYbU82GVz4',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'rel': 0, 'showinfo': 0, 'mute': 1, 'playlist': '1ZYbU82GVz4' }
+            });
+
+            videoPlayer2 = new YT.Player('videoPlayer2', {
                 height: '100%', width: '100%', videoId: '1ZYbU82GVz4',
                 playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'rel': 0, 'showinfo': 0, 'mute': 1, 'playlist': '1ZYbU82GVz4' }
             });
         }
 
+        // কসমিক সাইন ওয়েভ (VR অন থাকলে স্প্লিট স্ক্রিনে দুই জায়গায় রেন্ডার হবে)
         function renderCosmicWaves() {
-            if (!isCosmicActive || activeVisualMode === "video") return; // ভিডিও মোড থাকলে ড্রয়িং স্কিপ হবে
+            if (!isCosmicActive || activeVisualMode === "video") return;
             waveTime += 0.015;
 
             const w = cosmicCanvas.width;
             const h = cosmicCanvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            ctx.save();
-            ctx.translate(w / 2, h / 2);
+            let screens = isVRMode ? [w / 4, (3 * w) / 4] : [w / 2];
 
-            let pulseScale = 1.0 + Math.sin(waveTime * 0.5) * 0.25; 
-            ctx.scale(pulseScale, pulseScale);
+            screens.forEach((centerX) => {
+                ctx.save();
+                ctx.translate(centerX, h / 2);
+                let pulseScale = 1.0 + Math.sin(waveTime * 0.5) * 0.25; 
+                ctx.scale(pulseScale, pulseScale);
 
-            for (let k = 0; k < 5; k++) {
-                ctx.beginPath();
-                let colors = [
-                    'rgba(0, 191, 255, 0.85)', 'rgba(0, 255, 204, 0.80)',  
-                    'rgba(236, 72, 153, 0.75)', 'rgba(168, 85, 247, 0.70)', 'rgba(34, 211, 238, 0.65)'   
-                ];
-                
-                const edge = w / 2;
-                for (let x = -edge; x <= edge; x += 3) {
-                    let angle = (x * 0.005) + waveTime + (k * Math.PI / 2.5);
-                    let y = Math.sin(angle) * 110 * Math.cos(angle * 0.4 + waveTime * 0.2);
-                    let twistX = x + Math.sin(waveTime * 0.8 + k) * 25;
-
-                    if (x === -edge) ctx.moveTo(twistX, y);
-                    else ctx.lineTo(twistX, y);
+                for (let k = 0; k < 5; k++) {
+                    ctx.beginPath();
+                    let colors = ['rgba(0, 191, 255, 0.85)', 'rgba(0, 255, 204, 0.80)', 'rgba(236, 72, 153, 0.75)', 'rgba(168, 85, 247, 0.70)', 'rgba(34, 211, 238, 0.65)'];
+                    
+                    let edge = isVRMode ? w / 4 : w / 2;
+                    for (let x = -edge; x <= edge; x += 3) {
+                        let angle = (x * 0.008) + waveTime + (k * Math.PI / 2.5);
+                        let y = Math.sin(angle) * 90 * Math.cos(angle * 0.4 + waveTime * 0.2);
+                        if (x === -edge) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.lineWidth = 2; 
+                    ctx.strokeStyle = colors[k];
+                    ctx.stroke();
                 }
-                ctx.lineWidth = 2.5; 
-                ctx.strokeStyle = colors[k];
-                ctx.stroke();
-            }
-            ctx.restore();
+                ctx.restore();
+            });
+
             animationFrameId = requestAnimationFrame(renderCosmicWaves);
         }
 
         function startHealingSession() {
             const minutes = document.getElementById('timeInput').value;
             activeVisualMode = document.getElementById('visualModeInput').value;
+            isVRMode = document.getElementById('vrCheckbox').checked;
             let totalSeconds = minutes * 60;
             if (totalSeconds <= 0 || isNaN(totalSeconds)) return;
 
@@ -305,17 +330,26 @@
                 audioPlayer.playVideo();
             }
 
+            // VR মোডের লেআউট ক্লাস যোগ করা
+            if (isVRMode) {
+                document.getElementById('mainDisplay').classList.add('vr-active');
+                document.getElementById('videoBgContainer').classList.add('vr-active-bg');
+                document.getElementById('videoPlayer2Holder').style.display = "block";
+            } else {
+                document.getElementById('mainDisplay').classList.remove('vr-active');
+                document.getElementById('videoBgContainer').classList.remove('vr-active-bg');
+                document.getElementById('videoPlayer2Holder').style.display = "none";
+            }
+
             if (activeVisualMode === "video") {
-                if (videoPlayer && videoPlayer.playVideo) {
-                    videoPlayer.playVideo();
-                    document.getElementById('videoBgContainer').style.opacity = "1.0"; // ভিডিও সম্পূর্ণ ক্লিয়ার দেখানোর জন্য ১.০ ওপাসিটি
-                }
-                // ভিডিও মোডে শেপগুলোর ইন্টারভাল বন্ধ থাকবে, শুধু ভিডিও টেক্সট শো করবে
+                document.getElementById('videoBgContainer').style.opacity = "1.0";
+                if (videoPlayer1 && videoPlayer1.playVideo) videoPlayer1.playVideo();
+                if (isVRMode && videoPlayer2 && videoPlayer2.playVideo) videoPlayer2.playVideo();
+                
                 resetAllShapes();
-                document.getElementById('instructionText').innerText = "প্রকৃতি ও মহাবিশ্বের সৌন্দর্যে হারিয়ে যান...";
+                document.getElementById('instructionText').innerText = isVRMode ? "VR বক্স লাগিয়ে প্রকৃতিতে মগ্ন হোন..." : "প্রকৃতি ও মহাবিশ্বের সৌন্দর্যে হারিয়ে যান...";
             } else {
                 document.getElementById('videoBgContainer').style.opacity = "0";
-                
                 let currentMode = 0; 
                 changeMode(currentMode);
 
@@ -338,58 +372,65 @@
         }
 
         function resetAllShapes() {
-            document.getElementById('left-circleShape').style.display = 'none';
-            document.getElementById('right-circleShape').style.display = 'none';
-            document.getElementById('left-squareShape').style.display = 'none';
-            document.getElementById('right-squareShape').style.display = 'none';
-            document.getElementById('dualEyeView').style.display = 'none';
+            const shapes = ['l-c-1', 'l-s-1', 'r-c-1', 'r-s-1', 'l-c-2', 'l-s-2', 'r-c-2', 'r-s-2'];
+            shapes.forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('dualEyeView1').style.display = 'none';
+            document.getElementById('dualEyeView2').style.display = 'none';
             cosmicCanvas.style.display = 'none';
             isCosmicActive = false;
             cancelAnimationFrame(animationFrameId);
         }
 
         function changeMode(mode) {
-            if (activeVisualMode === "video") return; // ভিডিও মোড চালু থাকলে শেপ চেঞ্জ স্কিপ হবে
-
+            if (activeVisualMode === "video") return;
             resetAllShapes();
+            
             const insText = document.getElementById('instructionText');
+            document.getElementById('dualEyeView1').style.display = 'flex';
+            if (isVRMode) document.getElementById('dualEyeView2').style.display = 'flex';
 
             if (mode === 0) {
-                document.getElementById('dualEyeView').style.display = 'flex';
-                document.getElementById('left-circleShape').style.display = 'block';
-                document.getElementById('left-circleShape').style.animation = 'circleBreathe 8s ease-in-out infinite';
-                document.getElementById('right-circleShape').style.display = 'block';
-                document.getElementById('right-circleShape').style.animation = 'circleBreathe 8s ease-in-out infinite';
-                insText.innerText = "বৃত্তের প্রসারণের সাথে দুই চোখ শিথিল করুন...";
+                document.getElementById('l-c-1').style.display = 'block'; document.getElementById('r-c-1').style.display = 'block';
+                document.getElementById('l-c-1').style.animation = 'circleBreathe 8s ease-in-out infinite'; document.getElementById('r-c-1').style.animation = 'circleBreathe 8s ease-in-out infinite';
+                if(isVRMode) {
+                    document.getElementById('l-c-2').style.display = 'block'; document.getElementById('r-c-2').style.display = 'block';
+                    document.getElementById('l-c-2').style.animation = 'circleBreathe 8s ease-in-out infinite'; document.getElementById('r-c-2').style.animation = 'circleBreathe 8s ease-in-out infinite';
+                }
+                insText.innerText = "বৃত্তের প্রসারণের সাথে চোখ শিথিল করুন...";
             } else if (mode === 1) {
-                document.getElementById('dualEyeView').style.display = 'flex';
-                document.getElementById('left-squareShape').style.display = 'block';
-                document.getElementById('left-squareShape').style.animation = 'squareBreathe 9s ease-in-out infinite';
-                document.getElementById('right-squareShape').style.display = 'block';
-                document.getElementById('right-squareShape').style.animation = 'squareBreathe 9s ease-in-out infinite';
+                document.getElementById('l-s-1').style.display = 'block'; document.getElementById('r-s-1').style.display = 'block';
+                document.getElementById('l-s-1').style.animation = 'squareBreathe 9s ease-in-out infinite'; document.getElementById('r-s-1').style.animation = 'squareBreathe 9s ease-in-out infinite';
+                if(isVRMode) {
+                    document.getElementById('l-s-2').style.display = 'block'; document.getElementById('r-s-2').style.display = 'block';
+                    document.getElementById('l-s-2').style.animation = 'squareBreathe 9s ease-in-out infinite'; document.getElementById('r-s-2').style.animation = 'squareBreathe 9s ease-in-out infinite';
+                }
                 insText.innerText = "ধীর গতির আবর্তনটি অনুভব করুন...";
             } else if (mode === 2) {
+                document.getElementById('dualEyeView1').style.display = 'none';
+                document.getElementById('dualEyeView2').style.display = 'none';
                 cosmicCanvas.style.display = 'block';
                 isCosmicActive = true;
                 renderCosmicWaves();
-                insText.innerText = "স্ক্রিন জুড়ে বিস্তৃত কসমিক সাইন তরঙ্গে চোখ এলিয়ে দিন...";
+                insText.innerText = "কসমিক সাইন তরঙ্গে চোখ এলিয়ে দিন...";
             }
         }
 
         function updateUI(seconds) {
             const min = Math.floor(seconds / 60);
             const sec = seconds % 60;
-            document.getElementById('timerDisplay').innerText = 
-                `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
         }
 
         function endSession() {
             if (audioPlayer && audioPlayer.pauseVideo) audioPlayer.pauseVideo();
-            if (videoPlayer && videoPlayer.pauseVideo) videoPlayer.pauseVideo();
+            if (videoPlayer1 && videoPlayer1.pauseVideo) videoPlayer1.pauseVideo();
+            if (videoPlayer2 && videoPlayer2.pauseVideo) videoPlayer2.pauseVideo();
             
             document.getElementById('videoBgContainer').style.opacity = "0";
             resetAllShapes();
-            document.getElementById('dualEyeView').style.display = 'flex';
+            
+            document.getElementById('mainDisplay').classList.remove('vr-active');
+            document.getElementById('dualEyeView1').style.display = 'flex';
             
             document.getElementById('timerDisplay').innerText = "সেশন সম্পূর্ণ। আপনার চোখ ও মন এখন ফ্রেশ।";
             document.getElementById('instructionText').innerText = "";
