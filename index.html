@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiCalm - Dual Eye Healing Space</title>
+    <title>OptiCalm - Deep Cosmic Healing Space</title>
     <style>
         body {
             margin: 0;
@@ -55,14 +55,25 @@
 
         button:hover { transform: scale(1.02); filter: brightness(1.2); }
 
+        /* প্রধান কন্টেইনার */
+        .main-display-container {
+            position: relative;
+            width: 100vw;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* দুই চোখের জন্য দুই পাশের এরিয়া */
         .dual-eye-container {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            width: 100vw;
+            width: 100%;
             max-width: 1100px;
-            height: 450px;
-            position: relative;
+            height: 100%;
+            position: absolute;
         }
 
         .eye-space {
@@ -99,14 +110,15 @@
             100% { transform: scale(0.6) rotate(90deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 70px #d946ef; opacity: 0.3; }
         }
 
-        /* ফ্লুইড কসমিক তরঙ্গের জন্য ক্যানভাস স্টাইল */
-        canvas {
+        /* একক কসমিক ওয়েভের জন্য সেন্ট্রাল ক্যানভাস (জিপ ফাইলগুলোর মতো এফেক্ট) */
+        #cosmicCanvas {
             position: absolute;
             display: none;
-            width: 350px;
-            height: 350px;
-            filter: blur(8px); /* জিপ ফাইলের মতো সফট তরঙ্গের আভা তৈরির জন্য */
+            width: 600px;
+            height: 500px;
+            filter: blur(12px); /* ৩ডি সফট থ্রেড লাইট লুক দেওয়ার জন্য */
             mix-blend-mode: screen;
+            z-index: 5;
         }
 
         .timer-display { font-size: 24px; margin-top: 20px; font-weight: 300; letter-spacing: 2px; color: #64748b; }
@@ -117,23 +129,25 @@
 <body>
 
     <div class="controls" id="controlPanel">
-        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Dual Eye Cosmic Healing</h3>
+        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Cosmic Healing Space</h3>
         <label style="font-size: 14px; color:#64748b;">সময় দিন (মিনিট):</label>
         <input type="number" id="timeInput" min="1" max="60" value="2">
         <button onclick="startHealingSession()">সেশন শুরু করুন</button>
     </div>
 
-    <div class="dual-eye-container">
-        <div class="eye-space">
-            <div class="shape circle" id="left-circleShape"></div>
-            <div class="shape square" id="left-squareShape"></div>
-            <canvas id="leftCanvas" width="400" height="400"></canvas>
+    <div class="main-display-container">
+        <div class="dual-eye-container" id="dualEyeView">
+            <div class="eye-space">
+                <div class="shape circle" id="left-circleShape"></div>
+                <div class="shape square" id="left-squareShape"></div>
+            </div>
+            <div class="eye-space">
+                <div class="shape circle" id="right-circleShape"></div>
+                <div class="shape square" id="right-squareShape"></div>
+            </div>
         </div>
-        <div class="eye-space">
-            <div class="shape circle" id="right-circleShape"></div>
-            <div class="shape square" id="right-squareShape"></div>
-            <canvas id="rightCanvas" width="400" height="400"></canvas>
-        </div>
+
+        <canvas id="cosmicCanvas" width="700" height="500"></canvas>
     </div>
 
     <div class="timer-display" id="timerDisplay"></div>
@@ -142,17 +156,15 @@
 
     <script>
         let countdown;
-        let shapeInterval;
+        let modeInterval;
         let player;
         let animationFrameId;
         
-        const leftCanvas = document.getElementById('leftCanvas');
-        const rightCanvas = document.getElementById('rightCanvas');
-        const ctxLeft = leftCanvas.getContext('2d');
-        const ctxRight = rightCanvas.getContext('2d');
+        const cosmicCanvas = document.getElementById('cosmicCanvas');
+        const ctx = cosmicCanvas.getContext('2d');
         
         let waveTime = 0;
-        let isWaveActive = false;
+        let isCosmicActive = false;
 
         // ইউটিউব API লোড
         const tag = document.createElement('script');
@@ -166,50 +178,53 @@
             });
         }
 
-        // আপলোড করা জিপ ফাইলের মতো কসমিক ওয়েভ রেন্ডার করার ফাংশন
-        function drawCosmicWave(ctx, width, height, time) {
-            ctx.clearRect(0, 0, width, height);
+        // আপলোড করা জিপগুলোর মতো ৩ডি থ্রেড সাইনেসোইডাল তরঙ্গ আঁকার ফাংশন
+        function renderCosmicWaves() {
+            if (!isCosmicActive) return;
+            waveTime += 0.02;
+
+            const w = cosmicCanvas.width;
+            const h = cosmicCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+
             ctx.save();
-            ctx.translate(width / 2, height / 2);
+            ctx.translate(w / 2, h / 2);
 
-            // ব্রিদিং স্কেল (ধীরে ধীরে বড় এবং ছোট হওয়া)
-            let breatheScale = 1 + Math.sin(time * 0.5) * 0.25;
-            ctx.scale(breatheScale, breatheScale);
+            // ছোট থেকে বড় এবং বড় থেকে আবার ছোট হওয়ার মূল রিল্যাক্সিং ব্রিদিং মেকানিজম
+            let pulseScale = 1.0 + Math.sin(waveTime * 0.6) * 0.35; 
+            ctx.scale(pulseScale, pulseScale);
 
-            // একাধিক পরিলিপির মাধ্যমে ডেনসিটি ও ওয়েভ তৈরি
-            for (let j = 0; j < 3; j++) {
+            // একাধিক জটিল ওয়েভ লেয়ার ওভারল্যাপ (যা purplelight এবং cosmic জিপের মতো দেখায়)
+            for (let k = 0; k < 4; k++) {
                 ctx.beginPath();
-                let baseRadius = 80 + j * 10;
                 
-                for (let i = 0; i <= 360; i += 2) {
-                    let angle = (i * Math.PI) / 180;
+                // কালার সিলেকশন: কসমিক ব্লু, সায়ান এবং পার্পেল লাইটের মিক্সড কালার
+                let colors = [
+                    'rgba(0, 162, 255, 0.6)',  // ডিপ ব্লু
+                    'rgba(0, 255, 204, 0.5)',  // সায়ান গ্রীন
+                    'rgba(217, 70, 239, 0.5)', // পার্পেল লাইট
+                    'rgba(139, 92, 246, 0.4)'  // ভায়োলেট
+                ];
+                
+                for (let x = -250; x <= 250; x += 2) {
+                    // গাণিতিক তরঙ্গ ফর্মুলা (Sin/Cos মিক্সড থ্রেড মোশন)
+                    let angle = (x * 0.02) + waveTime + (k * Math.PI / 2);
+                    let y = Math.sin(angle) * 60 * Math.cos(angle * 0.5 + waveTime * 0.3);
                     
-                    // ম্যাথমেটিক্যাল নয়েজ ট্র্যাকিং যা জিপের মতো অরগানিক মোশন দেয়
-                    let offset = Math.sin(angle * 6 + time * 2) * 12 * Math.cos(angle * 3 - time);
-                    let r = baseRadius + offset;
-                    
-                    let x = r * Math.cos(angle);
-                    let y = r * Math.sin(angle);
-                    
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
+                    // থ্রিডি ইন্টারলেসড মোশনের জন্য এক্স অক্ষের ওপর একটু কার্ভ দেওয়া
+                    let twistX = x + Math.sin(waveTime + k) * 15;
+
+                    if (x === -250) ctx.moveTo(twistX, y);
+                    else ctx.lineTo(twistX, y);
                 }
-                
-                ctx.closePath();
-                // গ্লোয়িং সায়ান-ব্লু কালার গ্রেডিয়েন্ট এফেক্ট
-                ctx.lineWidth = 2.5;
-                ctx.strokeStyle = j === 0 ? 'rgba(0, 210, 255, 0.7)' : (j === 1 ? 'rgba(0, 102, 255, 0.5)' : 'rgba(0, 255, 204, 0.4)');
+
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = colors[k];
                 ctx.stroke();
             }
-            ctx.restore();
-        }
 
-        function animateWaves() {
-            if (!isWaveActive) return;
-            waveTime += 0.03;
-            drawCosmicWave(ctxLeft, 400, 400, waveTime);
-            drawCosmicWave(ctxRight, 400, 400, waveTime);
-            animationFrameId = requestAnimationFrame(animateWaves);
+            ctx.restore();
+            animationFrameId = requestAnimationFrame(renderCosmicWaves);
         }
 
         function startHealingSession() {
@@ -222,11 +237,11 @@
 
             if (player && player.playVideo) { player.setVolume(80); player.playVideo(); }
 
-            let currentMode = 0; // 0: Circle, 1: Square, 2: Cosmic Wave
+            let currentMode = 0; // 0: Dual Circle, 1: Dual Square, 2: Single Cosmic Wave
             changeMode(currentMode);
 
-            // প্রতি ১৫ সেকেন্ড পর পর মোড সুইপিং
-            shapeInterval = setInterval(() => {
+            // প্রতি ১৫ সেকেন্ড পর পর মুড চেঞ্জ হবে
+            modeInterval = setInterval(() => {
                 currentMode = (currentMode + 1) % 3;
                 changeMode(currentMode);
             }, 15000);
@@ -237,44 +252,45 @@
                 updateUI(totalSeconds);
                 if (totalSeconds <= 0) {
                     clearInterval(countdown);
-                    clearInterval(shapeInterval);
+                    clearInterval(modeInterval);
                     endSession();
                 }
             }, 1000);
         }
 
         function changeMode(mode) {
-            // সমস্ত এলিমেন্ট রিসেট করা
+            // সমস্ত এলিমেন্ট ডিফল্ট হাইড
             document.getElementById('left-circleShape').style.display = 'none';
             document.getElementById('right-circleShape').style.display = 'none';
             document.getElementById('left-squareShape').style.display = 'none';
             document.getElementById('right-squareShape').style.display = 'none';
-            leftCanvas.style.display = 'none';
-            rightCanvas.style.display = 'none';
-            isWaveActive = false;
+            document.getElementById('dualEyeView').style.display = 'none';
+            cosmicCanvas.style.display = 'none';
+            isCosmicActive = false;
             cancelAnimationFrame(animationFrameId);
 
             const insText = document.getElementById('instructionText');
 
             if (mode === 0) {
+                document.getElementById('dualEyeView').style.display = 'flex';
                 document.getElementById('left-circleShape').style.display = 'block';
                 document.getElementById('left-circleShape').style.animation = 'circleBreathe 8s ease-in-out infinite';
                 document.getElementById('right-circleShape').style.display = 'block';
                 document.getElementById('right-circleShape').style.animation = 'circleBreathe 8s ease-in-out infinite';
-                insText.innerText = "গোলকের প্রসারণের সাথে দুই চোখ শিথিল করুন...";
+                insText.innerText = "উভয় বৃত্তের প্রসারণের সাথে দুই চোখ শিথিল করুন...";
             } else if (mode === 1) {
+                document.getElementById('dualEyeView').style.display = 'flex';
                 document.getElementById('left-squareShape').style.display = 'block';
                 document.getElementById('left-squareShape').style.animation = 'squareBreathe 9s ease-in-out infinite';
                 document.getElementById('right-squareShape').style.display = 'block';
                 document.getElementById('right-squareShape').style.animation = 'squareBreathe 9s ease-in-out infinite';
-                insText.innerText = "ধীর গতির সমান্তরাল আবর্তনটি অনুভব করুন...";
+                insText.innerText = "ধীর গতির আবর্তনটি অনুভব করুন...";
             } else if (mode === 2) {
-                // আপনার জিপ ফাইলের কসমিক ওয়েভ মুড অ্যাক্টিভেট করা
-                leftCanvas.style.display = 'block';
-                rightCanvas.style.display = 'block';
-                isWaveActive = true;
-                animateWaves();
-                insText.innerText = "কসমিক তরঙ্গের ছন্দে গভীরভাবে মগ্ন হোন...";
+                // আপনার জিপ ফাইলের মতো ১টি মাত্র বড় সেন্ট্রাল ওয়েভ মুড অ্যাক্টিভেট
+                cosmicCanvas.style.display = 'block';
+                isCosmicActive = true;
+                renderCosmicWaves();
+                insText.innerText = "কেন্দ্রীয় কসমিক তরঙ্গের স্পন্দনে চোখ বন্ধ বা খোলা রেখে মগ্ন হোন...";
             }
         }
 
@@ -287,17 +303,17 @@
 
         function endSession() {
             if (player && player.pauseVideo) player.pauseVideo();
-            isWaveActive = false;
+            isCosmicActive = false;
             cancelAnimationFrame(animationFrameId);
             
             document.getElementById('left-circleShape').style.display = 'none';
             document.getElementById('right-circleShape').style.display = 'none';
             document.getElementById('left-squareShape').style.display = 'none';
             document.getElementById('right-squareShape').style.display = 'none';
-            leftCanvas.style.display = 'none';
-            rightCanvas.style.display = 'none';
+            cosmicCanvas.style.display = 'none';
+            document.getElementById('dualEyeView').style.display = 'flex';
             
-            document.getElementById('timerDisplay').innerText = "সেশন শেষ। আপনার দুই চোখ ও মন এখন সম্পূর্ণ শান্ত।";
+            document.getElementById('timerDisplay').innerText = "সেশন শেষ। আপনার চোখ ও মন এখন সতেজ।";
             document.getElementById('instructionText').innerText = "";
             
             setTimeout(() => {
