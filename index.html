@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiCalm - VR Cosmic Healing Space</title>
+    <title>OptiCalm - Sync with the Universe, Soothe Your Mind.</title>
     <style>
         body {
             margin: 0;
@@ -184,21 +184,21 @@
     <div class="controls" id="controlPanel">
         <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Cosmic VR Space</h3>
         
-        <label style="font-size: 14px; color:#a3a3a3;">সময় দিন (মিনিট):</label>
+        <label style="font-size: 14px; color:#a3a3a3;">Enter time (minutes):</label>
         <input type="number" id="timeInput" min="1" max="60" value="2">
         
-        <label style="font-size: 14px; color:#a3a3a3;">ভিজ্যুয়াল মোড সিলেক্ট করুন:</label>
+        <label style="font-size: 14px; color:#a3a3a3;">Select visual mode.:</label>
         <select id="visualModeInput">
-            <option value="black">Classic Black (পিওর ব্ল্যাক ব্যাকগ্রাউন্ড)</option>
-            <option value="video">Cosmic & Nature Video (গ্যালাক্সি ও প্রকৃতি ভিডিও)</option>
+            <option value="black">Classic Black (Pure black background)</option>
+            <option value="video">Cosmic & Nature Video (Galaxy and Nature Video)</option>
         </select>
 
         <div class="checkbox-container">
-            <label for="vrCheckbox" style="font-size: 15px; color:#38bdf8;">VR Box মোড সক্রিয় করুন</label>
+            <label for="vrCheckbox" style="font-size: 15px; color:#38bdf8;">Activate VR Box mode</label>
             <input type="checkbox" id="vrCheckbox">
         </div>
 
-        <button onclick="startHealingSession()">সেশন শুরু করুন</button>
+        <button onclick="startHealingSession()">Start the session.</button>
     </div>
 
     <!-- প্রধান কন্টেইনার -->
@@ -411,7 +411,7 @@
                 cosmicCanvas.style.display = 'block';
                 isCosmicActive = true;
                 renderCosmicWaves();
-                insText.innerText = "কসমিক সাইন তরঙ্গে চোখ এলিয়ে দিন...";
+                insText.innerText = "Open your eyes to the cosmic sine wave...";
             }
         }
 
@@ -432,7 +432,7 @@
             document.getElementById('mainDisplay').classList.remove('vr-active');
             document.getElementById('dualEyeView1').style.display = 'flex';
             
-            document.getElementById('timerDisplay').innerText = "সেশন সম্পূর্ণ। আপনার চোখ ও মন এখন ফ্রেশ।";
+            document.getElementById('timerDisplay').innerText = "The session is complete. Your eyes and mind are now fresh.";
             document.getElementById('instructionText').innerText = "";
             
             setTimeout(() => {
