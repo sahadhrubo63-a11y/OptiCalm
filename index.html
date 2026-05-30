@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiCalm - Full Screen Cosmic Healing Space</title>
+    <title>OptiCalm - Full Screen Cosmic Video Space</title>
     <style>
-        /* পুরো স্ক্রিন জুড়ে পিওর ব্ল্যাক ব্যাকগ্রাউন্ড */
         body {
             margin: 0;
             padding: 0;
@@ -21,12 +20,37 @@
             position: relative;
         }
 
-        /* কন্ট্রোল প্যানেল - তরঙ্গের ওপরে ভেসে থাকবে */
+        /* ইউটিউব ব্যাকগ্রাউন্ড ভিডিও কন্টেইনার - ফুল স্ক্রিন */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none; /* ভিডিওর ওপর ক্লিক আটকানোর জন্য */
+            opacity: 0.5; /* ভিডিওর উজ্জ্বলতা কিছুটা কমানো হয়েছে যেন শেপগুলো পরিষ্কার দেখা যায় */
+            transition: opacity 1s ease;
+        }
+
+        .video-background iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 Aspect Ratio */
+            min-height: 100vh;
+            min-width: 177.77vh;
+            transform: translate(-50%, -50%);
+        }
+
+        /* কন্ট্রোল প্যানেল - সবকিছুর ওপরে থাকবে */
         .controls {
             position: absolute;
             z-index: 15;
             text-align: center;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             padding: 25px;
             border-radius: 20px;
             backdrop-filter: blur(15px);
@@ -34,7 +58,7 @@
             max-width: 350px;
             width: 85%;
             transition: opacity 0.5s ease;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
 
         input, button {
@@ -60,7 +84,7 @@
 
         button:hover { transform: scale(1.02); filter: brightness(1.2); }
 
-        /* প্রধান ডিসপ্লে কন্টেইনার - ফুল স্ক্রিন */
+        /* প্রধান অ্যানিমেশন কন্টেইনার */
         .main-display-container {
             position: absolute;
             top: 0;
@@ -73,7 +97,6 @@
             z-index: 1;
         }
 
-        /* দুই চোখের সাধারণ কন্টেইনার */
         .dual-eye-container {
             display: flex;
             justify-content: space-around;
@@ -93,7 +116,6 @@
             height: 100%;
         }
 
-        /* সাধারণ শেপ স্টাইল - হালকা ব্লার ব্যাকগ্রাউন্ড এলিমেন্টের জন্য */
         .shape {
             position: absolute;
             width: 260px;
@@ -118,7 +140,7 @@
             100% { transform: scale(0.6) rotate(90deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 70px #d946ef; opacity: 0.3; }
         }
 
-        /* সাইনেসোইডাল তরঙ্গের জন্য ফুল স্ক্রিন ক্যানভাস (ব্লার মুক্ত ও পরিষ্কার) */
+        /* ক্রিস্টাল সাইনেসোইডাল ক্যানভাস */
         #cosmicCanvas {
             position: absolute;
             top: 0;
@@ -130,25 +152,27 @@
             z-index: 2;
         }
 
-        /* টাইমার ও নির্দেশাবলী যা স্ক্রিনের নিচে দেখা যাবে */
+        /* টাইমার ও টেক্সট ওভারলে */
         .info-overlay {
             position: absolute;
             bottom: 30px;
             z-index: 10;
             text-align: center;
-            pointer-events: none; /* অ্যানিমেশনে যেন কোনো বাধা না দেয় */
+            pointer-events: none;
         }
 
-        .timer-display { font-size: 24px; font-weight: 300; letter-spacing: 2px; color: #64748b; }
-        .instruction { font-size: 18px; margin-top: 8px; color: #475569; height: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        
-        #ytPlayer { display: none; }
+        .timer-display { font-size: 24px; font-weight: 300; letter-spacing: 2px; color: #cbd5e1; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+        .instruction { font-size: 18px; margin-top: 8px; color: #94a3b8; height: 25px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body>
 
+    <div class="video-background">
+        <div id="ytPlayer"></div>
+    </div>
+
     <div class="controls" id="controlPanel">
-        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Cosmic Fullscreen Space</h3>
+        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Nature & Cosmic Healing</h3>
         <label style="font-size: 14px; color:#64748b;">সময় দিন (মিনিট):</label>
         <input type="number" id="timeInput" min="1" max="60" value="2">
         <button onclick="startHealingSession()">সেশন শুরু করুন</button>
@@ -174,8 +198,6 @@
         <div class="instruction" id="instructionText"></div>
     </div>
 
-    <div id="ytPlayer"></div>
-
     <script>
         let countdown;
         let modeInterval;
@@ -188,7 +210,6 @@
         let waveTime = 0;
         let isCosmicActive = false;
 
-        // স্ক্রিনের সাইজ অনুযায়ী ক্যানভাসকে ফুল স্ক্রিন রেজোলিউশন দেওয়ার ফাংশন
         function resizeCanvas() {
             cosmicCanvas.width = window.innerWidth;
             cosmicCanvas.height = window.innerHeight;
@@ -200,17 +221,28 @@
         tag.src = "https://www.youtube.com/iframe_api";
         document.getElementsByTagName('head')[0].appendChild(tag);
 
+        // গ্যালাক্সি, ইউনিভার্স ও নেচার অ্যানিমেশন প্লেলিস্ট সেট করা
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('ytPlayer', {
-                height: '0', width: '0', videoId: 'I3OJUwILelU',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'I3OJUwILelU' }
+                height: '100%',
+                width: '100%',
+                videoId: '1ZYbU82GVz4', // আপনার দেওয়া প্রকৃতির মায়াবী ভিডিও আইডি
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'mute': 0, // অডিও বা মিউজিক শোনার জন্য মিউট অফ রাখা হলো
+                    'playlist': '1ZYbU82GVz4' // লুপে চালানোর জন্য প্লেলিস্ট আইডি
+                }
             });
         }
 
-        // আপলোড করা জিপ ফাইলের মায়াবী ক্রিস্টাল ক্লিয়ার ও ফুল স্ক্রিন তরঙ্গ রেন্ডারিং
+        // ক্রিস্টাল ক্লিয়ার সাইনেসোইডাল তরঙ্গ রেন্ডারিং
         function renderCosmicWaves() {
             if (!isCosmicActive) return;
-            waveTime += 0.015; // তরঙ্গের গতিকে আরও একটু স্মুথ এবং ধীর করা হয়েছে
+            waveTime += 0.015;
 
             const w = cosmicCanvas.width;
             const h = cosmicCanvas.height;
@@ -219,39 +251,31 @@
             ctx.save();
             ctx.translate(w / 2, h / 2);
 
-            // ছোট থেকে বড় এবং বড় থেকে ছোট হওয়ার মূল ব্রিদিং পালস এফেক্ট
             let pulseScale = 1.0 + Math.sin(waveTime * 0.5) * 0.25; 
             ctx.scale(pulseScale, pulseScale);
 
-            // ৫টি আলাদা ইন্টারলেসড সাইনেসোইডাল ওয়েভ লেয়ার (cosmic এবং purplelight জিপের মতো মিক্সড থ্রেড)
             for (let k = 0; k < 5; k++) {
                 ctx.beginPath();
                 
-                // কসমিক সায়ান, নিওন ব্লু এবং ভাইব্রেন্ট পার্পেল শেড
                 let colors = [
-                    'rgba(0, 191, 255, 0.75)',  // ডিপ নিওন ব্লু
-                    'rgba(0, 255, 204, 0.70)',  // ক্রিস্টাল সায়ান
-                    'rgba(236, 72, 153, 0.65)',  // ম্যাজেন্টা পিঙ্ক
-                    'rgba(168, 85, 247, 0.60)',  // নিওন পার্পেল
-                    'rgba(34, 211, 238, 0.55)'   // ব্রাইট লাইট ব্লু
+                    'rgba(0, 191, 255, 0.85)',  
+                    'rgba(0, 255, 204, 0.80)',  
+                    'rgba(236, 72, 153, 0.75)',  
+                    'rgba(168, 85, 247, 0.70)',  
+                    'rgba(34, 211, 238, 0.65)'   
                 ];
                 
-                // স্ক্রিনের এক প্রান্ত (-w/2) থেকে অন্য প্রান্ত (w/2) পর্যন্ত সাইন তরঙ্গ বিস্তৃত হবে
                 const edge = w / 2;
                 for (let x = -edge; x <= edge; x += 3) {
-                    
-                    // পিওর সাইনেসোইডাল মাল্টিপল ফ্রিকোয়েন্সি ফর্মুলা
                     let angle = (x * 0.005) + waveTime + (k * Math.PI / 2.5);
                     let y = Math.sin(angle) * 110 * Math.cos(angle * 0.4 + waveTime * 0.2);
-                    
-                    // থ্রিডি ডাইনামিক লাইট ইফেক্ট দেওয়ার জন্য সামান্য টুইস্ট
                     let twistX = x + Math.sin(waveTime * 0.8 + k) * 25;
 
                     if (x === -edge) ctx.moveTo(twistX, y);
                     else ctx.lineTo(twistX, y);
                 }
 
-                ctx.lineWidth = 2.5; // কোন ব্লার ছাড়া শার্প এবং একদম পরিষ্কার দাগ বা রেখা
+                ctx.lineWidth = 2.5; 
                 ctx.strokeStyle = colors[k];
                 ctx.stroke();
             }
@@ -265,14 +289,19 @@
             let totalSeconds = minutes * 60;
             if (totalSeconds <= 0 || isNaN(totalSeconds)) return;
 
-            resizeCanvas(); // ক্যানভাস সাইজ রিসেট
+            resizeCanvas();
 
             document.getElementById('controlPanel').style.opacity = '0';
             setTimeout(() => { document.getElementById('controlPanel').style.display = 'none'; }, 500);
 
-            if (player && player.playVideo) { player.setVolume(80); player.playVideo(); }
+            // ব্যাকগ্রাউন্ডে প্রকৃতির মায়াবী ভিডিও ও রিলাক্সিং মিউজিক প্লে করা
+            if (player && player.playVideo) { 
+                player.setVolume(80); 
+                player.playVideo(); 
+                document.querySelector('.video-background').style.opacity = "0.6"; // ভিডিও ভিজিবল করা হলো
+            }
 
-            let currentMode = 0; // 0: Dual Circle, 1: Dual Square, 2: Full Screen Sinusoidal Waves
+            let currentMode = 0; 
             changeMode(currentMode);
 
             modeInterval = setInterval(() => {
@@ -319,11 +348,10 @@
                 document.getElementById('right-squareShape').style.animation = 'squareBreathe 9s ease-in-out infinite';
                 insText.innerText = "ধীর গতির আবর্তনটি অনুভব করুন...";
             } else if (mode === 2) {
-                // ফুল স্ক্রিন জুড়ে একদম ক্লিয়ার সাইনেসোইডাল ওয়েভ মোড অ্যাক্টিভেট
                 cosmicCanvas.style.display = 'block';
                 isCosmicActive = true;
                 renderCosmicWaves();
-                insText.innerText = "স্ক্রিন জুড়ে বিস্তৃত কসমিক সাইন তরঙ্গে চোখ এলিয়ে দিন...";
+                insText.innerText = "কসমিক সাইন তরঙ্গের ছন্দে চোখ এলিয়ে দিন...";
             }
         }
 
@@ -335,7 +363,10 @@
         }
 
         function endSession() {
-            if (player && player.pauseVideo) player.pauseVideo();
+            if (player && player.pauseVideo) {
+                player.pauseVideo();
+            }
+            document.querySelector('.video-background').style.opacity = "0"; // ভিডিও আবার হাইড করা হলো
             isCosmicActive = false;
             cancelAnimationFrame(animationFrameId);
             
@@ -346,7 +377,7 @@
             cosmicCanvas.style.display = 'none';
             document.getElementById('dualEyeView').style.display = 'flex';
             
-            document.getElementById('timerDisplay').innerText = "সেশন সম্পূর্ণ। আপনার চোখ ও মন এখন ফ্রেশ।";
+            document.getElementById('timerDisplay').innerText = "সেশন সম্পূর্ণ। আপনার চোখ ও মন এখন সতেজ।";
             document.getElementById('instructionText').innerText = "";
             
             setTimeout(() => {
