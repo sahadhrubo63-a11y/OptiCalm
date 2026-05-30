@@ -70,14 +70,14 @@
             height: 400px;
         }
 
-        /* বেস শেপ স্টাইল - গ্লোয়িং ও ব্লারি এফেক্ট (600430c1d22c731b94cf4e7dae6b398a.gif ফাইলের মতো ওয়েভি লুকের জন্য) */
+        /* বেস শেপ স্টাইল - গ্লোয়িং ও ব্লারি এফেক্ট (600430c1d22c731b94cf4e7dae6b398a.gif ফাইলের মতো) */
         .shape {
             position: absolute;
             width: 150px;
             height: 150px;
             opacity: 0;
             display: none;
-            filter: blur(15px); /* তীক্ষ্ণ কোণা দূর করে চোখে শান্তি দেওয়ার জন্য */
+            filter: blur(15px);
             mix-blend-mode: screen;
         }
 
@@ -119,6 +119,9 @@
 
         .timer-display { font-size: 24px; margin-top: 20px; font-weight: 300; letter-spacing: 2px; color: #64748b; }
         .instruction { font-size: 18px; margin-top: 10px; color: #475569; height: 25px; }
+        
+        /* ইউটিউব প্লেয়ারটি ব্যাকগ্রাউন্ডে হাইড রাখার জন্য */
+        #ytPlayer { display: none; }
     </style>
 </head>
 <body>
@@ -140,18 +143,36 @@
     <div class="timer-display" id="timerDisplay"></div>
     <div class="instruction" id="instructionText"></div>
 
-    <!-- ইউটিউবের ৪৩২ হার্টজ ডিপ হিলিং এবং মৃদু বৃষ্টির সাউন্ড ট্র্যাকিংয়ের সাথে মিল রেখে রিল্যাক্সিং অডিও -->
-    <audio id="bgMusic" loop>
-        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.mp3" type="audio/mpeg">
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
-    </audio>
+    <!-- ইউটিউব প্লেয়ার হোল্ডার -->
+    <div id="ytPlayer"></div>
 
     <script>
         let countdown;
         let shapeInterval;
-        const audio = document.getElementById('bgMusic');
+        let player;
         const shapes = ['circleShape', 'squareShape', 'triangleShape'];
         const animations = ['circleBreathe 8s ease-in-out infinite', 'squareBreathe 9s ease-in-out infinite', 'triangleBreathe 10s ease-in-out infinite'];
+
+        // ইউটিউব API লোড করা
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // নির্দিষ্ট ইউটিউব ভিডিও আইডি সেট করা
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('ytPlayer', {
+                height: '0',
+                width: '0',
+                videoId: 'I3OJUwILelU',
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 'I3OJUwILelU'
+                }
+            });
+        }
 
         function startHealingSession() {
             const minutes = document.getElementById('timeInput').value;
@@ -163,14 +184,16 @@
             document.getElementById('controlPanel').style.opacity = '0';
             setTimeout(() => { document.getElementById('controlPanel').style.display = 'none'; }, 500);
 
-            // ডিপ মেডিটেশন রেইন মিউজিক প্লে
-            audio.volume = 0.7;
-            audio.play().catch(e => console.log("Audio play gesture required."));
+            // ইউটিউব নির্দিষ্ট মিউজিক প্লে করা
+            if (player && player.playVideo) {
+                player.setVolume(80);
+                player.playVideo();
+            }
 
             // প্রথম শেপ চালু করা
             changeShape(0);
 
-            // প্রতি ১৫ সেকেন্ড পর পর শেপ এবং কালার থিম পরিবর্তন হবে স্বয়ংক্রিয়ভাবে
+            // প্রতি ১৫ সেকেন্ড পর পর শেপ পরিবর্তন
             let currentShapeIndex = 0;
             shapeInterval = setInterval(() => {
                 currentShapeIndex = (currentShapeIndex + 1) % shapes.length;
@@ -192,23 +215,20 @@
         }
 
         function changeShape(index) {
-            // সব শেপ আগে হাইড করা
             shapes.forEach(id => {
                 const s = document.getElementById(id);
                 s.style.display = 'none';
                 s.style.animation = 'none';
             });
 
-            // নির্দিষ্ট শেপটি অ্যানিমেশনসহ শো করা
             const activeShape = document.getElementById(shapes[index]);
             activeShape.style.display = 'block';
             activeShape.style.animation = animations[index];
 
-            // মেসেজ আপডেট
             const insText = document.getElementById('instructionText');
-            if(index === 0) insText.innerText = "গোলকের প্রসারণের সাথে চোখ শিথিল করুন...";
-            else if(index === 1) insText.innerText = "ধীর গতির ঘূর্ণনটি অনুভব করুন...";
-            else insText.innerText = "গভীর শান্তিতে মগ্ন হোন...";
+            if(index === 0) insText.innerText = "গোলকের প্রসারণের সাথে চোখ ও মন শিথিল করুন...";
+            else if(index === 1) insText.innerText = "ধীর গতির আবর্তনটি অনুভব করুন...";
+            else insText.innerText = "গভীর প্রশান্তিতে মগ্ন হোন...";
         }
 
         function updateUI(seconds) {
@@ -219,8 +239,9 @@
         }
 
         function endSession() {
-            audio.pause();
-            audio.currentTime = 0;
+            if (player && player.pauseVideo) {
+                player.pauseVideo();
+            }
             
             shapes.forEach(id => document.getElementById(id).style.display = 'none');
             
