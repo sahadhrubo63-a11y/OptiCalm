@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiCalm - 432Hz Deep Healing Space</title>
+    <title>OptiCalm - Dual Eye Healing Space</title>
     <style>
         /* পিওর ব্ল্যাক ব্যাকগ্রাউন্ড - যা চোখের অপটিক্যাল নার্ভকে সম্পূর্ণ রেস্ট দেয় */
         body {
@@ -60,24 +60,35 @@
             filter: brightness(1.2);
         }
 
-        /* মূল অ্যানিমেশন কন্টেইনার */
-        .canvas-container {
+        /* দুই চোখের জন্য দুই পাশের মেইন কন্টেইনার */
+        .dual-eye-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100vw;
+            max-width: 1000px;
+            height: 450px;
+            position: relative;
+        }
+
+        /* প্রতি চোখের জন্য নির্দিষ্ট অ্যানিমেশন এরিয়া */
+        .eye-space {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 400px;
-            height: 400px;
+            width: 45%;
+            height: 100%;
         }
 
-        /* বেস শেপ স্টাইল - গ্লোয়িং ও ব্লারি এফেক্ট (600430c1d22c731b94cf4e7dae6b398a.gif ফাইলের মতো) */
+        /* বড় এবং গ্লোয়িং শেপ স্টাইল (ঝাপসা আলো যা চোখে প্রশান্তি দেবে) */
         .shape {
             position: absolute;
-            width: 150px;
-            height: 150px;
+            width: 240px; /* শেপের সাইজ বড় করা হয়েছে */
+            height: 240px;
             opacity: 0;
             display: none;
-            filter: blur(15px);
+            filter: blur(20px); /* ব্লার আরও স্মুথ করা হয়েছে */
             mix-blend-mode: screen;
         }
 
@@ -86,80 +97,86 @@
             border-radius: 50%;
         }
         @keyframes circleBreathe {
-            0% { transform: scale(0.6); background: radial-gradient(circle, #00d2ff, #0066ff, transparent); box-shadow: 0 0 60px #0066ff; opacity: 0.3; }
-            50% { transform: scale(1.4); background: radial-gradient(circle, #00ffcc, #00a3ff, transparent); box-shadow: 0 0 120px #00ffcc; opacity: 0.9; }
-            100% { transform: scale(0.6); background: radial-gradient(circle, #00d2ff, #0066ff, transparent); box-shadow: 0 0 60px #0066ff; opacity: 0.3; }
+            0% { transform: scale(0.6); background: radial-gradient(circle, #00d2ff, #0066ff, transparent); box-shadow: 0 0 70px #0066ff; opacity: 0.3; }
+            50% { transform: scale(1.3); background: radial-gradient(circle, #00ffcc, #00a3ff, transparent); box-shadow: 0 0 140px #00ffcc; opacity: 0.9; }
+            100% { transform: scale(0.6); background: radial-gradient(circle, #00d2ff, #0066ff, transparent); box-shadow: 0 0 70px #0066ff; opacity: 0.3; }
         }
 
-        /* ২. স্কয়ার শেপ ও পালসিং অ্যানিমেশন (ডিপ পার্পেল টু সফট ম্যাজেন্টা) */
+        /* ২. স্কয়ার শেপ ও পালসিং অ্যানিমেশন (ডিপ পার্পেল টু সফট ম্যাজেন্টา) */
         .square {
-            border-radius: 20px;
+            border-radius: 30px;
         }
         @keyframes squareBreathe {
-            0% { transform: scale(0.6) rotate(0deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 60px #d946ef; opacity: 0.3; }
-            50% { transform: scale(1.3) rotate(45deg); background: radial-gradient(circle, #ff007f, #aa00ff, transparent); box-shadow: 0 0 110px #ff007f; opacity: 0.8; }
-            100% { transform: scale(0.6) rotate(90deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 60px #d946ef; opacity: 0.3; }
+            0% { transform: scale(0.6) rotate(0deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 70px #d946ef; opacity: 0.3; }
+            50% { transform: scale(1.2) rotate(45deg); background: radial-gradient(circle, #ff007f, #aa00ff, transparent); box-shadow: 0 0 130px #ff007f; opacity: 0.8; }
+            100% { transform: scale(0.6) rotate(90deg); background: radial-gradient(circle, #d946ef, #701a75, transparent); box-shadow: 0 0 70px #d946ef; opacity: 0.3; }
         }
 
         /* ৩. ট্রায়াঙ্গেল শেপ অ্যানিমেশন (হিলিং গ্রীন টু গোল্ডেন ভাইব) */
         .triangle {
             width: 0;
             height: 0;
-            border-left: 90px solid transparent;
-            border-right: 90px solid transparent;
-            border-bottom: 150px solid #10b981;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-bottom: 240px solid #10b981;
             background: none !important;
-            filter: blur(20px);
+            filter: blur(25px);
         }
         @keyframes triangleBreathe {
             0% { transform: scale(0.6) rotate(0deg); border-bottom-color: #10b981; opacity: 0.3; }
-            50% { transform: scale(1.3) rotate(180deg); border-bottom-color: #f59e0b; opacity: 0.8; }
+            50% { transform: scale(1.2) rotate(180deg); border-bottom-color: #f59e0b; opacity: 0.8; }
             100% { transform: scale(0.6) rotate(360deg); border-bottom-color: #10b981; opacity: 0.3; }
         }
 
         .timer-display { font-size: 24px; margin-top: 20px; font-weight: 300; letter-spacing: 2px; color: #64748b; }
-        .instruction { font-size: 18px; margin-top: 10px; color: #475569; height: 25px; }
+        .instruction { font-size: 18px; margin-top: 10px; color: #475569; height: 25px; text-align: center; }
         
-        /* ইউটিউব প্লেয়ারটি ব্যাকগ্রাউন্ডে হাইড রাখার জন্য */
         #ytPlayer { display: none; }
     </style>
 </head>
 <body>
 
     <div class="controls" id="controlPanel">
-        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Deep Healing Space</h3>
+        <h3 style="margin-top:0; color:#94a3b8; font-weight: 400;">Dual Eye Healing Space</h3>
         <label style="font-size: 14px; color:#64748b;">সময় দিন (মিনিট):</label>
         <input type="number" id="timeInput" min="1" max="60" value="2">
         <button onclick="startHealingSession()">সেশন শুরু করুন</button>
     </div>
 
-    <div class="canvas-container">
-        <!-- তিনটি আলাদা শেপ এলিমেন্ট -->
-        <div class="shape circle" id="circleShape"></div>
-        <div class="shape square" id="squareShape"></div>
-        <div class="shape triangle" id="triangleShape"></div>
+    <!-- দুই চোখের জন্য সমান দুটি ভাগ সম্বলিত কন্টেইনার -->
+    <div class="dual-eye-container">
+        <!-- বাম চোখের স্পেস -->
+        <div class="eye-space">
+            <div class="shape circle" id="left-circleShape"></div>
+            <div class="shape square" id="left-squareShape"></div>
+            <div class="shape triangle" id="left-triangleShape"></div>
+        </div>
+        <!-- ডান চোখের স্পেস -->
+        <div class="eye-space">
+            <div class="shape circle" id="right-circleShape"></div>
+            <div class="shape square" id="right-squareShape"></div>
+            <div class="shape triangle" id="right-triangleShape"></div>
+        </div>
     </div>
 
     <div class="timer-display" id="timerDisplay"></div>
     <div class="instruction" id="instructionText"></div>
 
-    <!-- ইউটিউব প্লেয়ার হোল্ডার -->
     <div id="ytPlayer"></div>
 
     <script>
         let countdown;
         let shapeInterval;
         let player;
-        const shapes = ['circleShape', 'squareShape', 'triangleShape'];
+        const baseShapes = ['circleShape', 'squareShape', 'triangleShape'];
         const animations = ['circleBreathe 8s ease-in-out infinite', 'squareBreathe 9s ease-in-out infinite', 'triangleBreathe 10s ease-in-out infinite'];
 
-        // ইউটিউব API লোড করা
+        // ইউটিউব API লোড
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // নির্দিষ্ট ইউটিউব ভিডিও আইডি সেট করা
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('ytPlayer', {
                 height: '0',
@@ -180,27 +197,24 @@
 
             if (totalSeconds <= 0 || isNaN(totalSeconds)) return;
 
-            // প্যানেল হাইড
             document.getElementById('controlPanel').style.opacity = '0';
             setTimeout(() => { document.getElementById('controlPanel').style.display = 'none'; }, 500);
 
-            // ইউটিউব নির্দিষ্ট মিউজিক প্লে করা
             if (player && player.playVideo) {
                 player.setVolume(80);
                 player.playVideo();
             }
 
-            // প্রথম শেপ চালু করা
+            // প্রথম শেপ জোড়া চালু করা
             changeShape(0);
 
             // প্রতি ১৫ সেকেন্ড পর পর শেপ পরিবর্তন
             let currentShapeIndex = 0;
             shapeInterval = setInterval(() => {
-                currentShapeIndex = (currentShapeIndex + 1) % shapes.length;
+                currentShapeIndex = (currentShapeIndex + 1) % baseShapes.length;
                 changeShape(currentShapeIndex);
             }, 15000);
 
-            // টাইমার কাউন্টডাউন
             updateUI(totalSeconds);
             countdown = setInterval(() => {
                 totalSeconds--;
@@ -215,19 +229,27 @@
         }
 
         function changeShape(index) {
-            shapes.forEach(id => {
-                const s = document.getElementById(id);
-                s.style.display = 'none';
-                s.style.animation = 'none';
+            // বাম ও ডান পাশের সব শেপ আগে হাইড করা
+            baseShapes.forEach(id => {
+                document.getElementById('left-' + id).style.display = 'none';
+                document.getElementById('left-' + id).style.animation = 'none';
+                document.getElementById('right-' + id).style.display = 'none';
+                document.getElementById('right-' + id).style.animation = 'none';
             });
 
-            const activeShape = document.getElementById(shapes[index]);
-            activeShape.style.display = 'block';
-            activeShape.style.animation = animations[index];
+            // বর্তমান ইনডেক্সের দুটি শেপ একসাথে অন করা
+            const leftActive = document.getElementById('left-' + baseShapes[index]);
+            const rightActive = document.getElementById('right-' + baseShapes[index]);
+            
+            leftActive.style.display = 'block';
+            leftActive.style.animation = animations[index];
+            
+            rightActive.style.display = 'block';
+            rightActive.style.animation = animations[index];
 
             const insText = document.getElementById('instructionText');
-            if(index === 0) insText.innerText = "গোলকের প্রসারণের সাথে চোখ ও মন শিথিল করুন...";
-            else if(index === 1) insText.innerText = "ধীর গতির আবর্তনটি অনুভব করুন...";
+            if(index === 0) insText.innerText = "উভয় গোলকের প্রসারণের সাথে দুই চোখ শিথিল করুন...";
+            else if(index === 1) insText.innerText = "ধীর গতির সমান্তরাল আবর্তনটি অনুভব করুন...";
             else insText.innerText = "গভীর প্রশান্তিতে মগ্ন হোন...";
         }
 
@@ -243,9 +265,12 @@
                 player.pauseVideo();
             }
             
-            shapes.forEach(id => document.getElementById(id).style.display = 'none');
+            baseShapes.forEach(id => {
+                document.getElementById('left-' + id).style.display = 'none';
+                document.getElementById('right-' + id).style.display = 'none';
+            });
             
-            document.getElementById('timerDisplay').innerText = "সেশন শেষ। আপনার চোখ ও মন এখন সতেজ।";
+            document.getElementById('timerDisplay').innerText = "সেশন শেষ। আপনার দুই চোখ ও মন এখন সম্পূর্ণ সতেজ।";
             document.getElementById('instructionText').innerText = "";
             
             setTimeout(() => {
