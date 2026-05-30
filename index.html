@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>চোখের ও মনের শান্তি - Relaxation Space</title>
+    <title>OptiCalm - চোখের ও মনের শান্তি</title>
     <style>
-        /* পুরো স্ক্রিনের ব্যাকগ্রাউন্ড - চোখের জন্য আরামদায়ক ডার্ক গ্রেডিয়েন্ট */
+        /* মূল ব্যাকগ্রাউন্ড - ডিফল্ট রিল্যাক্সিং ডার্ক থিম */
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #0f172a, #1e1b4b, #0f172a);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background: linear-gradient(135deg, #0f172a, #111827);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -20,103 +18,113 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #e2e8f0;
             overflow: hidden;
+            transition: background 2s ease;
         }
 
-        /* ব্যাকগ্রাউন্ডের ধীর গতির অ্যানিমেশন */
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* কন্ট্রোল প্যানেল (ইনপুট ও বাটনের জন্য) */
+        /* কন্ট্রোল প্যানেল */
         .controls {
             z-index: 10;
             text-align: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
             transition: opacity 0.5s ease;
         }
 
-        input, button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 10px 15px;
+        select, input, button {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px;
             color: white;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
             outline: none;
-            margin: 5px;
+            margin: 8px 0;
+            width: 100%;
+            box-sizing: border-box;
         }
+
+        select option { background: #1e1b4b; color: white; }
 
         button {
             cursor: pointer;
-            background: #3b82f6;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
             font-weight: bold;
             border: none;
-            transition: 0.3s;
+            margin-top: 15px;
+            transition: 0.3s ease;
         }
 
         button:hover {
-            background: #1d4ed8;
-            transform: scale(1.05);
+            transform: scale(1.02);
+            filter: brightness(1.2);
         }
 
-        /* মূল অ্যানিমেশন এলিমেন্ট (Breathing Orb) - যা চোখে প্রশান্তি দেবে */
+        /* অ্যানিমেশন কন্টেইনার */
         .canvas-container {
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 300px;
-            height: 300px;
+            width: 350px;
+            height: 350px;
+            position: relative;
         }
 
+        /* মূল গ্লোয়িং অরবিটার */
         .orb {
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, #60a5fa, #3b82f6, transparent);
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
-            filter: blur(10px);
-            box-shadow: 0 0 60px #3b82f6, 0 0 100px #1d4ed8;
-            opacity: 0;
             display: none;
+            filter: blur(12px);
+            transition: all 1s ease;
         }
 
-        /* শ্বাসের ওঠানামার মতো অ্যানিমেশন (Inhale/Exhale) */
-        @keyframes breathe {
-            0% { transform: scale(0.8); filter: blur(15px); opacity: 0.6; }
-            50% { transform: scale(1.4); filter: blur(5px); opacity: 1; box-shadow: 0 0 80px #10b981, 0 0 120px #059669; }
-            100% { transform: scale(0.8); filter: blur(15px); opacity: 0.6; }
+        /* ১. রিল্যাক্সিং মুড: ব্রিদিং এবং পালসিং (সফট ব্লু ও গ্রীন) */
+        @keyframes relaxBreathe {
+            0% { transform: scale(0.8); background: radial-gradient(circle, #60a5fa, #3b82f6, transparent); box-shadow: 0 0 60px #3b82f6; }
+            50% { transform: scale(1.3); background: radial-gradient(circle, #34d399, #10b981, transparent); box-shadow: 0 0 100px #10b981; }
+            100% { transform: scale(0.8); background: radial-gradient(circle, #60a5fa, #3b82f6, transparent); box-shadow: 0 0 60px #3b82f6; }
         }
 
-        /* টাইমার টেক্সট */
-        .timer-display {
-            font-size: 24px;
-            margin-top: 20px;
-            font-weight: 300;
-            letter-spacing: 2px;
+        /* ২. স্লিপিং মুড: ধীর গতির ডিম লাইট গ্লো (সফট পার্পেল ও ওয়ার্ম গোল্ড) */
+        @keyframes sleepGlow {
+            0% { transform: scale(0.95); opacity: 0.4; background: radial-gradient(circle, #c084fc, #8b5cf6, transparent); box-shadow: 0 0 50px #8b5cf6; }
+            50% { transform: scale(1.1); opacity: 0.8; background: radial-gradient(circle, #fde047, #eab308, transparent); box-shadow: 0 0 90px #eab308; }
+            100% { transform: scale(0.95); opacity: 0.4; background: radial-gradient(circle, #c084fc, #8b5cf6, transparent); box-shadow: 0 0 50px #8b5cf6; }
         }
 
-        /* রিল্যাক্সিং মেসেজ */
-        .instruction {
-            font-size: 18px;
-            margin-top: 10px;
-            color: #94a3b8;
-            height: 25px;
+        /* ৩. মেলোডি মুড: কসমিক ওয়েভ বা কন্টিনিউয়াস স্পিন (সফট সায়ান ও ম্যাজেন্টা) */
+        @keyframes melodyWave {
+            0% { transform: scale(1) rotate(0deg); border-radius: 45% 55% 50% 50% / 50% 45% 55% 50%; background: radial-gradient(circle, #22d3ee, #06b6d4, transparent); box-shadow: 0 0 70px #06b6d4; }
+            50% { transform: scale(1.2) rotate(180deg); border-radius: 55% 45% 55% 45% / 45% 55% 45% 55%; background: radial-gradient(circle, #f472b6, #ec4899, transparent); box-shadow: 0 0 110px #ec4899; }
+            100% { transform: scale(1) rotate(360deg); border-radius: 45% 55% 50% 50% / 50% 45% 55% 50%; background: radial-gradient(circle, #22d3ee, #06b6d4, transparent); box-shadow: 0 0 70px #06b6d4; }
         }
+
+        .timer-display { font-size: 26px; margin-top: 20px; font-weight: 300; letter-spacing: 2px; }
+        .instruction { font-size: 18px; margin-top: 10px; color: #94a3b8; height: 25px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="controls" id="controlPanel">
-        <h3 style="margin-top:0;">আপনার রিল্যাক্সেশন টাইম সেট করুন</h3>
-        <input type="number" id="timeInput" min="1" max="60" value="2" placeholder="মিনিট">
-        <button onclick="startRelaxation()">শুরু করুন</button>
+        <h2 style="margin-top:0; color:#cbd5e1; font-size: 22px;">OptiCalm স্পেস</h2>
+        
+        <label for="moodSelect">মুড সিলেক্ট করুন:</label>
+        <select id="moodSelect">
+            <option value="relax">Relaxing (চোখের ক্লান্তি দূর করতে)</option>
+            <option value="sleep">Sleeping (গভীর ঘুমের আবেশ পেতে)</option>
+            <option value="melody">Melody (মনকে শান্ত ও সতেজ করতে)</option>
+        </select>
+
+        <label for="timeInput">সময় নির্ধারণ করুন (মিনিট):</label>
+        <input type="number" id="timeInput" min="1" max="60" value="3">
+
+        <button onclick="startSession()">শান্তি সেশন শুরু করুন</button>
     </div>
 
     <div class="canvas-container">
@@ -126,86 +134,107 @@
     <div class="timer-display" id="timerDisplay"></div>
     <div class="instruction" id="instructionText"></div>
 
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="bgMusic" loop></audio>
 
     <script>
         let countdown;
         const audio = document.getElementById('bgMusic');
 
-        function startRelaxation() {
+        // মুড ভিত্তিক মিউজিক ও ব্যাকগ্রাউন্ড ডাটাবেজ
+        const moodSettings = {
+            relax: {
+                music: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // লাইট নেচার/মেডিটেশন ট্র্যাক
+                bg: "linear-gradient(135deg, #0f172a, #0f2b48, #0f172a)",
+                animation: "relaxBreathe 9s ease-in-out infinite",
+                textIn: "ধীরে ধীরে গভীর শ্বাস নিন...",
+                textOut: "ধীরে ধীরে শ্বাস ছেড়ে দিন..."
+            },
+            sleep: {
+                music: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", // অতি ধীর লয়ের স্লিপ মিউজিক
+                bg: "linear-gradient(135deg, #090514, #130a2b, #090514)",
+                animation: "sleepGlow 12s ease-in-out infinite",
+                textIn: "চোখের পাতা শিথিল করুন...",
+                textOut: "সব চিন্তা ছেড়ে দিন..."
+            },
+            melody: {
+                music: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", // পিয়ানো ও সফট মেলোডি ট্র্যাক
+                bg: "linear-gradient(135deg, #061f2d, #083344, #061f2d)",
+                animation: "melodyWave 10s ease-in-out infinite",
+                textIn: "মিউজিকের ছন্দ অনুভব করুন...",
+                textOut: "মস্তিষ্ক শান্ত হতে দিন..."
+            }
+        };
+
+        function startSession() {
+            const mood = document.getElementById('moodSelect').value;
             const minutes = document.getElementById('timeInput').value;
             let totalSeconds = minutes * 60;
 
-            if (totalSeconds <= 0 || isNaN(totalSeconds)) {
-                alert("দয়া করে সঠিক সময় দিন।");
-                return;
-            }
+            if (totalSeconds <= 0 || isNaN(totalSeconds)) return;
 
-            // ইন্টারফেস পরিবর্তন
+            // প্যানেল হাইড করা
             document.getElementById('controlPanel').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('controlPanel').style.display = 'none';
-            }, 500);
+            setTimeout(() => { document.getElementById('controlPanel').style.display = 'none'; }, 500);
 
-            // অ্যানিমেশন ও মিউজিক চালু করা
+            // মুড অনুযায়ী থিম ও মিউজিক সেটআপ
+            const config = moodSettings[mood];
+            document.body.style.background = config.bg;
+            
+            audio.src = config.music;
+            audio.load();
+            audio.play().catch(e => console.log("Audio play blocked, click required."));
+
+            // অ্যানিমেশন অ্যাক্টিভেট করা
             const orb = document.getElementById('relaxOrb');
             orb.style.display = 'block';
-            orb.style.animation = 'breathe 8s ease-in-out infinite'; // ৮ সেকেন্ডের স্মুথ সাইকেল
-            audio.play();
+            orb.style.animation = config.animation;
 
-            // টাইমার ও ইন্সট্রাকশন চালু
-            updateTimer(totalSeconds);
-            updateInstruction(totalSeconds);
+            // টাইমার ও টেক্সট আপডেট
+            updateUI(totalSeconds, config);
 
             countdown = setInterval(() => {
                 totalSeconds--;
-                updateTimer(totalSeconds);
-                updateInstruction(totalSeconds);
+                updateUI(totalSeconds, config);
 
                 if (totalSeconds <= 0) {
                     clearInterval(countdown);
-                    endRelaxation();
+                    endSession();
                 }
             }, 1000);
         }
 
-        function updateTimer(seconds) {
+        function updateUI(seconds, config) {
             const min = Math.floor(seconds / 60);
             const sec = seconds % 60;
             document.getElementById('timerDisplay').innerText = 
                 `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-        }
 
-        function updateInstruction(seconds) {
+            // প্রতি ৪-৫ সেকেন্ড পর পর টেক্সট টগল
             const insText = document.getElementById('instructionText');
-            // প্রতি ৪ সেকেন্ড পর পর শ্বাস নেওয়া ও ছাড়ার নির্দেশ (চোখ বন্ধ বা খোলা রেখে করা যাবে)
-            if (seconds % 8 >= 4) {
-                insText.innerText = "ধীরে ধীরে গভীর শ্বাস নিন...";
-                insText.style.color = "#60a5fa";
+            if (seconds % 10 >= 5) {
+                insText.innerText = config.textIn;
             } else {
-                insText.innerText = "ধীরে ধীরে শ্বাস ছেড়ে দিন...";
-                insText.style.color = "#10b981";
+                insText.innerText = config.textOut;
             }
         }
 
-        function endRelaxation() {
+        function endSession() {
             audio.pause();
             audio.currentTime = 0;
+            
             const orb = document.getElementById('relaxOrb');
             orb.style.animation = 'none';
             orb.style.display = 'none';
             
-            document.getElementById('timerDisplay').innerText = "অধিবেশন শেষ! আপনি এখন শান্ত।";
+            document.body.style.background = "linear-gradient(135deg, #0f172a, #111827)";
+            document.getElementById('timerDisplay').innerText = "সেশন সম্পূর্ণ হয়েছে। আপনি এখন শান্ত ও মুক্ত।";
             document.getElementById('instructionText').innerText = "";
             
-            // কন্ট্রোল প্যানেল ফিরিয়ে আনা
             setTimeout(() => {
                 const cp = document.getElementById('controlPanel');
                 cp.style.display = 'block';
                 setTimeout(() => cp.style.opacity = '1', 50);
-            }, 3000);
+            }, 4000);
         }
     </script>
 </body>
